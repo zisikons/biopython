@@ -19,6 +19,11 @@ services:
   - postgresql
 language: python
 cache: pip
+env:
+  global:
+    # Doctr deploy key for biopython/docs
+    secure: "FESLSraf70KdiYneQjKcIluexDznbuEJsMnkG42HcPlwKj7C82VbekMWLgYDia6t4iMQYJBK3us8sSgJhwnGrj40LekQvkgkYHHTI\
+T7u01F+ppizfAI2nRdRrb0S6xVBeZHpAqiX+Q7K9+8lNb49V/UR8j3YjB6Tcst9EKYlbuA="
 matrix:
   include:
     - stage: basics
@@ -53,6 +58,9 @@ matrix:
         apt:
           packages:
       before_install: echo "Going to build API docs"
+      after_success:
+        # TODO - remove doctr from branch white list
+        - if [[ $TRAVIS_REPO_SLUG == 'biopython/biopython' ]]; then pip install doctr; doctr deploy ${TRAVIS_TAG:-dev} --key-path .github/github_deploy_key_biopython_docs.enc --build-tags --branch-whitelist master doctr --built-docs Doc/api/_build/html/ --deploy-repo biopython/docs; fi
     - stage: test
       python: 2.7
       env: TOXENV=py27-cover
